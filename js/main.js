@@ -37,6 +37,49 @@ document.addEventListener("DOMContentLoaded", () => {
     backToTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
   }
 
+  const bhkButtons = document.querySelectorAll(".bhk-pill");
+  const parkingButtons = document.querySelectorAll(".parking-pill");
+  const configCards = document.querySelectorAll(".config-card");
+
+  const syncConfigSelection = () => {
+    const activeBhk = document.querySelector(".bhk-pill.active")?.textContent.trim() || "2 BHK";
+    const activeParking = document.querySelector(".parking-pill.active")?.textContent.trim() || "Without Car Parking";
+
+    configCards.forEach((card) => {
+      const cardTag = card.querySelector(".config-tag")?.textContent.trim();
+      const statusNode = card.querySelector(".config-status");
+      const isMatch = cardTag === activeBhk;
+      card.classList.toggle("active", isMatch);
+      if (statusNode) statusNode.textContent = activeParking;
+    });
+  };
+
+  if (!document.querySelector(".bhk-pill.active")) {
+    const defaultBhk = document.querySelectorAll(".bhk-pill")[1];
+    if (defaultBhk) defaultBhk.classList.add("active");
+  }
+
+  if (!document.querySelector(".parking-pill.active")) {
+    const defaultParking = document.querySelector(".parking-pill");
+    if (defaultParking) defaultParking.classList.add("active");
+  }
+
+  bhkButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      bhkButtons.forEach((item) => item.classList.toggle("active", item === button));
+      syncConfigSelection();
+    });
+  });
+
+  parkingButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      parkingButtons.forEach((item) => item.classList.toggle("active", item === button));
+      syncConfigSelection();
+    });
+  });
+
+  syncConfigSelection();
+
   const visitModal = document.createElement("div");
   visitModal.className = "visit-modal";
   visitModal.innerHTML = `
