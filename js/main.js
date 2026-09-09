@@ -46,9 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeParking = document.querySelector(".parking-pill.active")?.textContent.trim() || "Without Car Parking";
 
     configCards.forEach((card) => {
-      const cardTag = card.querySelector(".config-tag")?.textContent.trim();
+      const cardBhk = card.dataset.bhk;
       const statusNode = card.querySelector(".config-status");
-      const isMatch = cardTag === activeBhk;
+      const isMatch = cardBhk === activeBhk;
       card.classList.toggle("active", isMatch);
       if (statusNode) statusNode.textContent = activeParking;
     });
@@ -79,6 +79,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   syncConfigSelection();
+
+  document.querySelectorAll(".spec-row").forEach((row) => {
+    row.addEventListener("click", () => {
+      const expanded = row.getAttribute("aria-expanded") === "true";
+      row.setAttribute("aria-expanded", String(!expanded));
+    });
+  });
 
   const visitModal = document.createElement("div");
   visitModal.className = "visit-modal";

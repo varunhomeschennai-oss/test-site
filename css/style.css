@@ -1429,16 +1429,132 @@ img { max-width: 100%; display: block; }
 }
 
 .config-card {
+  overflow: hidden;
   background: #fff;
   border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 1.4rem;
-  box-shadow: 0 14px 30px rgba(17,17,17,0.04);
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 10px 24px rgba(17,17,17,0.14);
 }
 
 .config-card.active {
-  background: linear-gradient(180deg, rgba(211,47,47,0.04), #fff);
-  border-color: rgba(211,47,47,0.18);
+  border-color: rgba(17,17,17,0.18);
+}
+
+.config-price-band {
+  min-height: 103px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.8rem 1rem;
+  background: var(--red);
+  color: #fff;
+}
+
+.config-price-band .config-tag {
+  min-width: auto;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.96rem;
+  letter-spacing: 0.08em;
+}
+
+.config-price-band strong {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-size: clamp(2.1rem, 3vw, 2.75rem);
+  line-height: 1;
+}
+
+.config-price-band strong span {
+  font-size: 1.7rem;
+}
+
+.config-price-band small {
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.config-card-body {
+  padding: 0 0.35rem 1.15rem;
+}
+
+.config-card-body > .config-status {
+  display: none;
+}
+
+.spec-list {
+  display: grid;
+}
+
+.spec-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 0.65rem 0.25rem;
+  border: 0;
+  border-bottom: 1px solid rgba(17,17,17,0.2);
+  background: transparent;
+  color: var(--dark);
+  text-align: left;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.spec-row b {
+  padding-left: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.spec-row em {
+  display: none;
+  grid-column: 1 / -1;
+  padding: 0.2rem 1.5rem 0.1rem 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.spec-row[aria-expanded="true"] em {
+  display: block;
+}
+
+.spec-row[aria-expanded="true"] b {
+  font-size: 0;
+}
+
+.spec-row[aria-expanded="true"] b::after {
+  content: "-";
+  font-size: 1.1rem;
+}
+
+.spec-cta {
+  display: block;
+  width: fit-content;
+  margin: 1.1rem auto 0;
+  padding: 0.65rem 1.05rem;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.spec-cta:hover {
+  background: #a52323;
+  color: #fff;
 }
 
 .config-card-header {
