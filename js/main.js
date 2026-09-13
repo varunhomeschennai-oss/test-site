@@ -1,6 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.add("js-ready");
   if (window.AOS) {
-    AOS.init({ duration: 850, once: true, offset: 80 });
+    AOS.init({ duration: 1150, easing: "cubic-bezier(.16, 1, .3, 1)", once: true, offset: 90 });
+  }
+
+  const slowRevealItems = document.querySelectorAll(".btn:not([data-aos]), .social-profile-box:not([data-aos]), .stat-card:not([data-aos]), .project-finder-card:not([data-aos]), .service-card:not([data-aos]), .feature-card:not([data-aos]), .config-card:not([data-aos]), .gallery-item:not([data-aos]), .form-panel:not([data-aos]), .emi-result:not([data-aos]), .testimonial-card:not([data-aos])");
+  if (slowRevealItems.length && "IntersectionObserver" in window) {
+    const slowRevealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8%" });
+    slowRevealItems.forEach((item, index) => {
+      item.classList.add("slow-reveal");
+      item.style.transitionDelay = `${Math.min(index % 5, 4) * 80}ms`;
+      slowRevealObserver.observe(item);
+    });
   }
 
   if (window.matchMedia("(pointer: fine)").matches) {
@@ -30,9 +47,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }, 900);
 
   const backToTop = document.getElementById("backToTop");
-  window.addEventListener("scroll", () => {
+  let scrollFrame = null;
+  const syncScrollChrome = () => {
+    scrollFrame = null;
+    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = scrollableHeight > 0 ? (window.scrollY / scrollableHeight) * 100 : 0;
+    document.documentElement.style.setProperty("--scroll-progress", `${progress}%`);
+    document.body.classList.toggle("is-scrolled", window.scrollY > 36);
     if (backToTop) backToTop.classList.toggle("show", window.scrollY > 500);
-  });
+  };
+  window.addEventListener("scroll", () => {
+    if (!scrollFrame) scrollFrame = window.requestAnimationFrame(syncScrollChrome);
+  }, { passive: true });
+  syncScrollChrome();
   if (backToTop) {
     backToTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
   }
@@ -79,6 +106,109 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   syncConfigSelection();
+
+  const projectFinderResults = document.getElementById("projectFinderResults");
+  const projectFinderDetail = document.getElementById("projectFinderDetail");
+  if (projectFinderResults && projectFinderDetail) {
+    const projects = [
+      { id: "sriperumbudur-1", name: "Greenfield Starter Home", location: "sriperumbudur", locationLabel: "Sriperumbudur", bhk: ["1 BHK", "2 BHK"], parking: ["with", "without"], type: "Compact villa plots and homes", area: "720 - 1,050 sq ft", status: "New launch", description: "A practical first home planned for easy maintenance, natural light, and flexible future expansion.", features: ["DTCP planned layout", "Water connection", "Living and dining space", "Electrical and plumbing work"], floorPlan: "images/1bhk.png" },
+      { id: "sriperumbudur-2", name: "Highway Garden Villa", location: "sriperumbudur", locationLabel: "Sriperumbudur", bhk: ["2 BHK", "3 BHK"], parking: ["with"], type: "Family villa community", area: "1,200 - 1,650 sq ft", status: "Site visits open", description: "A family-focused villa option with dedicated parking, open surroundings, and room to grow.", features: ["Dedicated car parking", "On-road connectivity", "Three-bedroom upgrade option", "Construction support"], floorPlan: "images/1bhk.png" },
+      { id: "avadi-1", name: "Avadi Urban Villa", location: "avadi", locationLabel: "Avadi", bhk: ["2 BHK", "3 BHK"], parking: ["with", "without"], type: "Urban family residence", area: "1,050 - 1,500 sq ft", status: "Available for enquiry", description: "A well-connected home format designed for modern family routines, with practical layouts and finish choices.", features: ["Flexible floor plans", "Optional car parking", "Kitchen and bathroom package", "Turnkey project guidance"], floorPlan: "images/1bhk.png" },
+      { id: "avadi-2", name: "Avadi Signature Residence", location: "avadi", locationLabel: "Avadi", bhk: ["3 BHK"], parking: ["with"], type: "Premium villa residence", area: "1,650 - 2,100 sq ft", status: "Premium collection", description: "A larger signature residence with extra family space, premium finishes, and dedicated vehicle parking.", features: ["Three-bedroom layout", "Dedicated car parking", "Premium flooring options", "Site supervision and handover"], floorPlan: "images/1bhk.png" }
+    ];
+    const locationSelect = document.getElementById("projectLocation");
+    const bhkSelect = document.getElementById("projectBhk");
+    const parkingSelect = document.getElementById("projectParking");
+    let selectedProject = null;
+    const customSelects = [];
+    const closeCustomSelects = (activeSelect) => customSelects.forEach((customSelect) => {
+      if (customSelect !== activeSelect) customSelect.classList.remove("open");
+    });
+    [locationSelect, bhkSelect, parkingSelect].forEach((select) => {
+      const field = select.closest(".finder-field");
+      if (!field) return;
+      const wrapper = document.createElement("div");
+      wrapper.className = "custom-select";
+      const trigger = document.createElement("button");
+      trigger.className = "custom-select-trigger";
+      trigger.type = "button";
+      trigger.setAttribute("aria-haspopup", "listbox");
+      trigger.setAttribute("aria-expanded", "false");
+      const menu = document.createElement("div");
+      menu.className = "custom-select-menu";
+      menu.setAttribute("role", "listbox");
+      const options = Array.from(select.options).map((option) => {
+        const optionButton = document.createElement("button");
+        optionButton.type = "button";
+        optionButton.className = "custom-select-option";
+        optionButton.dataset.value = option.value;
+        optionButton.setAttribute("role", "option");
+        optionButton.textContent = option.textContent;
+        optionButton.addEventListener("click", () => {
+          select.value = option.value;
+          select.dispatchEvent(new Event("change", { bubbles: true }));
+          wrapper.classList.remove("open");
+          trigger.setAttribute("aria-expanded", "false");
+          trigger.textContent = option.textContent;
+          menu.querySelectorAll(".custom-select-option").forEach((item) => item.classList.toggle("active", item === optionButton));
+        });
+        menu.append(optionButton);
+        return optionButton;
+      });
+      trigger.textContent = select.options[select.selectedIndex].textContent;
+      options[select.selectedIndex]?.classList.add("active");
+      trigger.addEventListener("click", () => {
+        closeCustomSelects(wrapper);
+        const isOpen = wrapper.classList.toggle("open");
+        trigger.setAttribute("aria-expanded", String(isOpen));
+      });
+      wrapper.append(trigger, menu);
+      select.classList.add("native-select-hidden");
+      field.append(wrapper);
+      customSelects.push(wrapper);
+    });
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".custom-select")) {
+        customSelects.forEach((customSelect) => customSelect.classList.remove("open"));
+      }
+    });
+    const renderDetail = (project) => {
+      selectedProject = project;
+      projectFinderDetail.innerHTML = `<div class="finder-detail-media"><img src="${project.floorPlan}" alt="${project.name} floor plan"></div><div class="finder-detail-copy"><p class="section-kicker">${project.locationLabel} / ${project.type}</p><h3>${project.name}</h3><p>${project.description}</p><div class="finder-detail-specs"><span><b>Size</b>${project.area}</span><span><b>Options</b>${project.bhk.join(" / ")}</span><span><b>Parking</b>${project.parking.includes("with") ? "Available" : "On request"}</span><span><b>Status</b>${project.status}</span></div><h4>Project details</h4><ul>${project.features.map((feature) => `<li><i class="bi bi-check2"></i>${feature}</li>`).join("")}</ul><div class="finder-detail-actions"><a class="btn btn-red" href="villa-brochure.html"><i class="bi bi-file-earmark-text"></i> View Brochure</a><a class="btn btn-dark-line" href="contact.html?project=${encodeURIComponent(project.name)}&project_type=Book%20a%20Site%20Visit"><i class="bi bi-calendar-check"></i> Book Site Visit</a></div></div>`;
+    };
+    const renderProjects = () => {
+      const location = locationSelect.value;
+      const bhk = bhkSelect.value;
+      const parking = parkingSelect.value;
+      const matches = projects.filter((project) => (location === "all" || project.location === location) && (bhk === "all" || project.bhk.includes(bhk)) && (parking === "all" || project.parking.includes(parking)));
+      projectFinderResults.innerHTML = matches.length ? matches.map((project) => `<button class="project-finder-card${selectedProject?.id === project.id ? " active" : ""}" type="button" data-project-id="${project.id}"><span class="finder-card-location">${project.locationLabel}</span><strong>${project.name}</strong><span>${project.bhk.join(" / ")} | ${project.parking.includes("with") ? "Parking available" : "Parking on request"}</span><i class="bi bi-arrow-right"></i></button>`).join("") : `<p class="finder-no-results">No projects match these choices. Try another combination.</p>`;
+      projectFinderResults.querySelectorAll("[data-project-id]").forEach((card) => card.addEventListener("click", () => { const project = projects.find((item) => item.id === card.dataset.projectId); renderDetail(project); renderProjects(); projectFinderDetail.scrollIntoView({ behavior: "smooth", block: "start" }); }));
+      if (!matches.some((project) => project.id === selectedProject?.id)) {
+        selectedProject = null;
+        projectFinderDetail.innerHTML = `<div class="finder-detail-empty"><i class="bi bi-hand-index-thumb"></i><h3>Select a project</h3><p>Project details, specifications, floor plan, and brochure will appear here.</p></div>`;
+      }
+    };
+    [locationSelect, bhkSelect, parkingSelect].forEach((select) => select.addEventListener("change", renderProjects));
+    renderProjects();
+  }
+
+  const liveSubscriberCount = document.getElementById("liveSubscriberCount");
+  if (liveSubscriberCount) {
+    const channelId = liveSubscriberCount.dataset.channelId;
+    const updateLiveSubscriberCount = async () => {
+      try {
+        const response = await fetch(`https://api.socialcounts.org/youtube-live-subscriber-count/${channelId}`);
+        if (!response.ok) throw new Error("Live subscriber request failed");
+        const data = await response.json();
+        const subscriberCount = data.counters?.api?.subscriberCount ?? data.counters?.estimation?.subscriberCount;
+        if (subscriberCount !== undefined) liveSubscriberCount.textContent = Number(subscriberCount).toLocaleString("en-IN");
+      } catch (error) {
+        liveSubscriberCount.textContent = "Unavailable";
+      }
+    };
+    updateLiveSubscriberCount();
+    window.setInterval(updateLiveSubscriberCount, 10000);
+  }
 
   document.querySelectorAll(".spec-row").forEach((row) => {
     row.addEventListener("click", () => {
